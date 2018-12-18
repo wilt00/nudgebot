@@ -1,4 +1,5 @@
-// import * as Discord from "discord.js";
+require('@google-cloud/debug-agent').start();
+
 import * as Discord from "discord.js";
 import { inspect } from "util";
 import Datastore = require("@google-cloud/datastore");
@@ -24,16 +25,16 @@ async function initializeCount() {
   }).then(() => {
     console.log("Count initialization success");
   }).catch((err) => {
-    console.log("Count initialization failed");
-    console.log(err);
+    console.error("Count initialization failed");
+    console.error(err);
   });
 }
 
 async function incrementCount() {
   let err: Error, entity: object = await datastore.get(countK);
   if (err) {
-    console.log("Update failed on retrieval");
-    console.log(err);
+    console.error("Update failed on retrieval");
+    console.error(err);
     return;
   }
   let entityCt = entity as ICount[];
@@ -42,8 +43,8 @@ async function incrementCount() {
     key: countK,
     data: entityCt,
   }).catch((err) => {
-    console.log("Update failed on writeback");
-    console.log(err);
+    console.error("Update failed on writeback");
+    console.error(err);
   });
   return entityCt[0].count;
 }
@@ -66,6 +67,6 @@ datastore.get(discordK).then((data) => {
   const dToken = data[0] as IToken;
   client.login(dToken.token);
 }).catch((err: Error) => {
-  console.log("Failed to retrieve token");
-  console.log(err);
+  console.error("Failed to retrieve token");
+  console.error(err);
 });
