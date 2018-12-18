@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "lib": ["es6"],
+    "outDir": "dist",
+    "moduleResolution": "node"
+  },
+  "files": [
+      "src/index.ts",
+      "src/parser.ts"
+  ]
+}
