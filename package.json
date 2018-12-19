@@ -4,11 +4,15 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@types/dotenv": "^6.1.0",
     "@types/node": "^10.12.15",
     "@types/node-schedule": "^1.2.2",
+    "@types/pegjs": "^0.10.1",
     "discord.js": "^11.4.2",
+    "dotenv": "^6.2.0",
     "moment": "^2.23.0",
     "node-schedule": "^1.3.1",
+    "pegjs": "^0.10.0",
     "typescript": "^3.2.2"
   },
   "devDependencies": {
@@ -16,8 +20,9 @@
   },
   "scripts": {
     "start": "tsc && node ./dist/index.js",
-    "build": "tsc",
-    "runw": "tsc && node ./dist/index.js",
+    "clean": "rm dist/* && rm src/message.js",
+    "build": "pegjs -o src/message.js src/message.pegjs && cp src/message.js dist/message.js && tsc",
+    "run": "node ./dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
