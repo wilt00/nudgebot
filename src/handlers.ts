@@ -69,6 +69,7 @@ export function reminderCommand(msg: Discord.Message) {
   });
 
   for (const relChunk of relTokens) {
+    if (relChunk.length < 1) continue;
     const totalRelTimeout = relChunk.reduce(
       (acc: number, cur) => acc + cur.seconds,
       0
