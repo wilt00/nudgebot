@@ -26,6 +26,11 @@ client.on("message", (msg: Discord.Message) => {
   if (msg.content.startsWith("~r")) {
     reminderCommand(msg);
   }
+  // Match variations on "Thank you, bot!"
+  // Tests at https://regex101.com/r/MnSns5/1
+  if (/thank(s| you).*(reminder|nudge)?bot([^\w]|$)/gim.test(msg.content)) {
+    msg.reply("You're very welcome!");
+  }
 });
 
 client.login(env.DISCORD_TOKEN);
