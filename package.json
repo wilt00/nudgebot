@@ -16,14 +16,17 @@
     "typescript": "^3.2.2"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
     "tslint": "^5.11.0"
   },
   "scripts": {
-    "start": "tsc && node ./dist/index.js",
+    "start": "node ./dist/index.js",
     "clean": "rm dist/* && rm src/message.js",
     "build": "pegjs -o src/message.js src/message.pegjs && cp src/message.js dist/message.js && tsc",
-    "run": "node ./dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./dist/message.test.js"
   },
   "author": "",
   "license": "MIT"
