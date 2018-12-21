@@ -1,7 +1,7 @@
 import * as Discord from "discord.js";
 import * as Dotenv from "dotenv";
-import { reminderCommand } from "./handlers";
-import Message = require("./message.js");
+import { reminderCommand, listCommand } from "./handlers";
+// import Message = require("./message.js");
 // import { inspect } from "util";
 import { env } from "process";
 
@@ -24,7 +24,8 @@ client.on("message", (msg: Discord.Message) => {
     msg.reply(`shapow!`);
   }
   if (msg.content.startsWith("~r")) {
-    reminderCommand(msg);
+    if (msg.content.toLowerCase() === "~r list") listCommand(msg);
+    else reminderCommand(msg);
   }
   // Match variations on "Thank you, bot!"
   // Tests at https://regex101.com/r/MnSns5/1

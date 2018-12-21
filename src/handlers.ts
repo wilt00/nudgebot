@@ -1,25 +1,8 @@
 import * as Discord from "discord.js";
 import Message = require("./message.js");
+import { Reminder, ReminderStore } from "./reminder";
 
-let hook: Discord.WebhookClient = undefined;
-
-/**
- * Sends message to target user using default app webhook.
- * Initializes webhook client if does not yet exist
- * @param target Target of reminder
- * @param message Message to remind about
- */
-function remind(target: Discord.User, message?: string) {
-  if (!hook) {
-    hook = new Discord.WebhookClient(
-      "524715382867492894",
-      "k_uLFGNcwD--L9d-DqHFcnfyOoaRSFJGl1FpGg7NI7hzxuCeggeu92xOvzZQZ2CAJEkW"
-    );
-  }
-  const msgOut = [`This is your reminder, ${target}!`];
-  if (message) msgOut.push(`I'm reminding you about: ${message}`);
-  hook.send(msgOut);
-}
+const reminders = new ReminderStore();
 
 function padMin(mins: number): string {
   if (mins < 10) {
@@ -28,7 +11,12 @@ function padMin(mins: number): string {
   return mins.toString();
 }
 
+// TODO:
+// function sanitizeMessage(message:string, mbr: Discord.GuildMember): string {}
+
 export function reminderCommand(msg: Discord.Message) {
+  const now = new Date();
+
   let msgInfo: Message.IMessageInfo;
   try {
     msgInfo = Message.parse(msg.content.slice(2));
@@ -47,15 +35,15 @@ export function reminderCommand(msg: Discord.Message) {
   }
 
   // Combine relative tokens into one
-
   const relTokens: Message.IRelTime[][] = [[]];
   let r = 0;
   msgInfo.list.forEach((t, i, ls) => {
     // Just relative tokens - but don't .filter(), we need the info
     if (t.type !== "REL") return;
+    // Separate relative time tokens into buckets representing logical units
     // Conditions where we want to move to a new bucket:
-    //  - t.newRel === true
-    //  - previous token was ABS
+    //  - t.newRel === true (Corresponds to "...and in ..." in the text)
+    //  - previous token was ABS (e.g. "...5:00pm 2 hrs")
     //  - current bucket already contains this unit
     if (
       t.newRel ||
@@ -70,29 +58,17 @@ export function reminderCommand(msg: Discord.Message) {
 
   for (const relChunk of relTokens) {
     if (relChunk.length < 1) continue;
-    const totalRelTimeout = relChunk.reduce(
-      (acc: number, cur) => acc + cur.seconds,
-      0
-    );
-    setTimeout(remind, totalRelTimeout * 1000, msg.author, msgInfo.message);
 
-    const totalRelHrs = Math.floor(totalRelTimeout / 3600);
-    const totalRelMins = Math.floor(
-      (totalRelTimeout - totalRelHrs * 3600) / 60
-    );
-    const totalRelSecs = totalRelTimeout % 60;
-    const relMsg = [
-      `Reminder scheduled in **${totalRelHrs > 0 ? `${totalRelHrs} hours` : ""}${
-        totalRelMins > 0 ? `${totalRelMins} minutes` : ""
-      }${totalRelSecs > 0 ? `${totalRelSecs} seconds` : ""}**`
-    ];
-    if (msgInfo.message) relMsg.push(`about: ${msgInfo.message}`);
-    msg.reply(relMsg);
+    const secs = relChunk.reduce((acc, cur) => acc + cur.seconds, 0);
+    const targetDate = new Date(now.valueOf() + 1000 * secs);
+
+    const r = new Reminder(targetDate, msg, msgInfo.message);
+    reminders.add(r);
+    r.notify();
   }
 
   const absTokens = msgInfo.list.filter(t => t.type === "ABS");
   if (absTokens.length > 0) {
-    const now = new Date();
     for (let t of absTokens as Message.IAbsTime[]) {
       let dayStr: string, dayNum: number;
       if (t.minutes < 0) t.minutes = 0;
@@ -115,14 +91,19 @@ export function reminderCommand(msg: Discord.Message) {
         t.hours,
         t.minutes
       );
-      const rTimeStr = `at ${targetDate.getHours()}:${padMin(
-        targetDate.getMinutes()
-      )} ${dayStr} (${targetDate.toLocaleString()})`;
-      const msgOffset = targetDate.valueOf() - now.valueOf();
-      const msgOut = [`Reminder will be sent ${rTimeStr}`];
-      if (msgInfo.message) msgOut.push(`about: ${msgInfo.message}`);
-      msg.reply(msgOut);
-      setTimeout(remind, msgOffset, msg.author, msgInfo.message);
+      const r = new Reminder(targetDate, msg, msgInfo.message);
+      reminders.add(r);
+      r.notify();
     }
+  }
+}
+
+export function listCommand(msg: Discord.Message) {
+  const rList = reminders.get(msg.author);
+  if (!rList || rList.length === 0) {
+    msg.reply("you have no currently active reminders!");
+  } else {
+    const reminderStrings = rList.map((r) => r.list());
+    msg.reply(["here are your active reminders!"].concat(reminderStrings));
   }
 }
