@@ -1,0 +1,21 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
+  "jsRules": {},
+  "rules": {
+    "new-parens": true,
+    "no-bitwise": true,
+    "no-conditional-assignment": true,
+    "no-console": {
+      "severity": "warning"
+    },
+    "adjacent-overload-signatures": true,
+    "promise-function-async": true,
+    "await-promise": true,
+    "ban-comma-operator": true,
+    "encoding": true,
+    "completed-docs": true,
+    "curly": false
+  },
+  "rulesDirectory": []
+}

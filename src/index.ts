@@ -1,9 +1,9 @@
 import * as Discord from "discord.js";
 import * as Dotenv from "dotenv";
-import { reminderCommand, listCommand } from "./handlers";
 // import Message = require("./message.js");
 // import { inspect } from "util";
 import { env } from "process";
+import { listCommand, reminderCommand } from "./handlers";
 
 // Load .env config. Expects: DISCORD_TOKEN
 const configResult = Dotenv.config();
