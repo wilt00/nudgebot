@@ -44,6 +44,8 @@ describe("Message", () => {
       [" 12:00aM", {list:[{hours:0, minutes:0, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
       [" 12:00am", {list:[{hours:0, minutes:0, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
       [" 12am", {list:[{hours:0, minutes:-1, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
+      [" noon", {list:[{hours:12, minutes:0, type:"ABS", clock:12, meridian:"PM"}],message: "" }],
+      [" midnight", {list:[{hours:0, minutes:0, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
 
       [" in 5 minutes", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1, newRel:true}], message: "" }],
       [" in 5 mins", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1, newRel:true}], message: "" }],

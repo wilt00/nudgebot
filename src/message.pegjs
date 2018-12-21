@@ -39,6 +39,8 @@
     Hrs                     9 hrs
     :[0-5]#_AM              9:59 AM
 
+Noon/Midnight ~~AbsTimeWord
+
 Absolute:
 at 0#      ~~AbsZero
            [0-5]#       ~~MilMins     -           at 0550
@@ -83,7 +85,8 @@ in #... hrs ~~RelToken
 }
 */
 
-Start = _ ls:(TimeTokenList / AbsTokenList / RelTokenList) _ msg:Message {
+// Start = _ ls:(TimeTokenList / AbsTokenList / RelTokenList) _ msg:Message {
+Start = _ ls:TimeTokenList _ msg:Message {
   return {
     list: ls,
     message: msg,
@@ -95,7 +98,7 @@ _ "whitespace" = [ \t\n\r]*
 // TimeTokenList = (TimeToken)+
 TimeTokenList = (TimeToken/RelToken/AbsToken)+
 
-TimeToken = _ "and"i? _ t:(One / NotOne) _ {return t;}
+TimeToken = _ "and"i? _ t:(One / NotOne / AbsTimeWord) _ {return t;}
 
 One = [1] _ u:(TenElevenTwelve / AboveTwelve / AbsMins / Unit / LongUnit / Meridian) {
   if (u.type === "REL") return incrementUnit(u, "1");
@@ -118,16 +121,23 @@ SecondDigit = i:[0-9] _ u:(Unit / LongUnit) {return incrementUnit(u, i);}
 
 LongUnit = i:$([0-9]+) _ u:Unit {return incrementUnit(u, i);}
 
+AbsTimeWord = w:("midnight"i / "noon"i) {
+  w = w.toLowerCase();
+  if (w === "midnight")
+    return {hours: 0, minutes: 0, meridian: "AM", type: "ABS", clock: 12};
+  return {hours: 12, minutes: 0, meridian: "PM", type: "ABS", clock: 12};
+}
+
 // == Relative ==
-RelTokenList = _"in"i _ ls:(RelToken)+ {return ls;}
+// RelTokenList = _"in"i _ ls:(RelToken)+ {return ls;}
 RelToken = _ (("and"i)?) _ I:(("in"i?)) _ u:LongUnit {
   if (I) u.newRel = true;
   return u;
 }
 
 // == Absolute ==
-AbsTokenList = "at"i _ ls:(AbsToken)+ { return ls; }
-AbsToken = _ "and"i? _ "at"i? _ a:(AbsZero / AbsOne / AbsTwo / AbsAboveTwo) _ { return a; }
+// AbsTokenList = "at"i _ ls:(AbsToken)+ { return ls; }
+AbsToken = _ "and"i? _ "at"i? _ a:(AbsZero / AbsOne / AbsTwo / AbsAboveTwo / AbsTimeWord) _ { return a; }
 
 AbsZero = [0]h:[0-9] m:(MilMins / AbsMins / Meridian) {
   let hrs = parseInt(h, 10);
