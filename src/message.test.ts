@@ -4,7 +4,7 @@ import Message = require("./../src/message.js");
 
 describe("Message", () => {
   describe("#parse()", () => {
-    const testValues: [string, Message.IMessageInfo][] = [
+    const testValues: Array<[string, Message.IMessageInfo]> = [
       [" at 12 PM", {list:[{hours:12, minutes:-1, type:"ABS", clock:12, meridian:"PM"}],message: "" }],
       [" at 5 PM", {list:[{hours:17, minutes:-1, type:"ABS", clock:12, meridian:"PM"}],message: "" }],
       [" at 5PM", {list:[{hours:17, minutes:-1, type:"ABS", clock:12, meridian:"PM"}],message: "" }],
@@ -46,6 +46,9 @@ describe("Message", () => {
       [" 12am", {list:[{hours:0, minutes:-1, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
       [" noon", {list:[{hours:12, minutes:0, type:"ABS", clock:12, meridian:"PM"}],message: "" }],
       [" midnight", {list:[{hours:0, minutes:0, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
+      [" 10:59am", {list:[{hours:10, minutes:59, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
+      [" 10am", {list:[{hours:10, minutes:-1, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
+      [" 1:59am", {list:[{hours:1, minutes:59, type:"ABS", clock:12, meridian:"AM"}],message: "" }],
 
       [" in 5 minutes", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1, newRel:true}], message: "" }],
       [" in 5 mins", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1, newRel:true}], message: "" }],
@@ -71,6 +74,8 @@ describe("Message", () => {
       [" 5 minutes", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1}], message: "" }],
       [" 5 mins", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1}], message: "" }],
       [" 5mins", {list:[{ seconds: 300, type:"REL", unit:"MIN", unitFactor:60, e10:1}], message: "" }],
+      [" 10mins", {list:[{ seconds: 600, type:"REL", unit:"MIN", unitFactor:60, e10:2}], message: "" }],
+      [" 15mins", {list:[{ seconds: 900, type:"REL", unit:"MIN", unitFactor:60, e10:2}], message: "" }],
       [" 1min", {list:[{ seconds: 60, type:"REL", unit:"MIN", unitFactor:60, e10:1}], message: "" }],
       [" 1 min", {list:[{ seconds: 60, type:"REL", unit:"MIN", unitFactor:60, e10:1}], message: "" }],
       [" 1 minute", {list:[{ seconds: 60, type:"REL", unit:"MIN", unitFactor:60, e10:1}], message: "" }],

@@ -24,17 +24,13 @@
                 AM          ~~Meridian  10 AM
                 hrs         ~~Unit      10 hrs
                 ##..._hrs   ~~LongUnit  12345 hrs
-    [3-9]_     ~~AboveTwelve
-                hrs         ~~Unit      17 hrs
-                ##..._hrs   ~~LongUnit  1999 hrs
+    ##..._hrs  ~~LongUnit               1999 hrs
     :[0-5]#_AM ~~AbsMins                1:59 AM
     AM         ~~Meridian               1 AM
     Hrs        ~~Unit                   1 hr
 
 ^1 ~~NotOne
-    #         ~~SecondDigit
-               hrs          99 hrs
-               #... hrs     99999 hrs
+    #... hrs                99999 hrs
     AM                      9 AM
     Hrs                     9 hrs
     :[0-5]#_AM              9:59 AM
@@ -85,7 +81,6 @@ in #... hrs ~~RelToken
 }
 */
 
-// Start = _ ls:(TimeTokenList / AbsTokenList / RelTokenList) _ msg:Message {
 Start = _ ls:TimeTokenList _ msg:Message {
   return {
     list: ls,
@@ -95,17 +90,16 @@ Start = _ ls:TimeTokenList _ msg:Message {
 
 _ "whitespace" = [ \t\n\r]*
 
-// TimeTokenList = (TimeToken)+
 TimeTokenList = (TimeToken/RelToken/AbsToken)+
 
 TimeToken = _ "and"i? _ t:(One / NotOne / AbsTimeWord) _ {return t;}
 
-One = [1] _ u:(TenElevenTwelve / AboveTwelve / AbsMins / Unit / LongUnit / Meridian) {
+One = [1] _ u:(TenElevenTwelve / AbsMins / Unit / LongUnit / Meridian) {
   if (u.type === "REL") return incrementUnit(u, "1");
   if (u.hours < 0) u.hours = twelveTo24(1, u.meridian);
   return u;
 }
-NotOne = i:[0,2-9] _ u:(SecondDigit / AbsMins / Unit / Meridian) {
+NotOne = i:[0,2-9] _ u:(LongUnit / AbsMins / Unit / Meridian) {
   if (u.type === "REL") return incrementUnit(u, i);
   u.hours = twelveTo24(parseInt(i, 10), u.meridian);
   return u;
@@ -116,8 +110,6 @@ TenElevenTwelve = i:[0-2] _ u:(AbsMins / LongUnit / Unit / Meridian) {
   u.hours = twelveTo24(parseInt("1" + i, 10), u.meridian);
   return u;
 }
-AboveTwelve = [3-9] _ (Unit / LongUnit) {return incrementUnit(u, i);}
-SecondDigit = i:[0-9] _ u:(Unit / LongUnit) {return incrementUnit(u, i);}
 
 LongUnit = i:$([0-9]+) _ u:Unit {return incrementUnit(u, i);}
 
