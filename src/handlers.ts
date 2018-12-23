@@ -1,6 +1,6 @@
 import * as Discord from "discord.js";
 import Message = require("./message.js");
-import { Reminder } from "./reminder";
+import { listDBReminders, Reminder } from "./reminder";
 
 function padMin(mins: number): string {
   if (mins < 10) {
@@ -72,7 +72,7 @@ export function reminderCommand(msg: Discord.Message) {
   const absTokens = msgInfo.list.filter(t => t.type === "ABS");
   if (absTokens.length > 0) {
     for (const t of absTokens as Message.IAbsTime[]) {
-      let dayStr: string;
+      // TODO: What if it's more than 24 hrs in the future?
       let dayNum: number;
       if (t.minutes < 0) t.minutes = 0;
       if (
@@ -80,11 +80,9 @@ export function reminderCommand(msg: Discord.Message) {
         (now.getHours() === t.hours && now.getMinutes() >= t.minutes)
       ) {
         // Tomorrow
-        dayStr = "tomorrow";
         dayNum = now.getDate() + 1;
       } else {
         // Today
-        dayStr = "today";
         dayNum = now.getDate();
       }
       const targetDate = new Date(
@@ -103,6 +101,8 @@ export function reminderCommand(msg: Discord.Message) {
       r.notify();
     }
   }
+
+  console.log(listDBReminders());
 }
 
 export function listCommand(msg: Discord.Message) {

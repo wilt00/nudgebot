@@ -1,11 +1,8 @@
-import * as DB from "better-sqlite3";
 import * as Discord from "discord.js";
 import * as Dotenv from "dotenv";
-// import Message = require("./message.js");
-// import { inspect } from "util";
 import { env } from "process";
 import { listCommand, reminderCommand } from "./handlers";
-import { restore } from "./reminder";
+import { closeDB, restore } from "./reminder";
 
 // Load .env config. Expects: DISCORD_TOKEN
 const configResult = Dotenv.config();
@@ -17,35 +14,58 @@ if (configResult.error) {
 
 export const disClient = new Discord.Client();
 
-// const exitFn = () => {
-//   db.close();
-// }
-// process.on('exit', exitFn);
-// process.on('SIGINT', exitFn);
-// process.on('SIGHUP', exitFn);
-// process.on('SIGTERM', exitFn);
+const onTime = new Date();
+
+const exitFn = () => {
+  closeDB();
+}
+process.on('exit', exitFn);
+process.on('SIGINT', exitFn);
+process.on('SIGHUP', exitFn);
+process.on('SIGTERM', exitFn);
 
 disClient.on("ready", () => {
   console.log(`Logged in as ${disClient.user.tag}!`);
+  if (env.NUDGEBOT_DEBUG_CHANNEL) {
+    (disClient.channels.get(
+      env.NUDGEBOT_DEBUG_CHANNEL
+    ) as Discord.TextChannel).send("Bot has been restarted!");
+  }
 });
 
-disClient.on("error", (e) => {
+disClient.on("error", e => {
   console.error("Error event fired");
   console.error(e);
 });
 
 disClient.on("message", (msg: Discord.Message) => {
+  if (env.NUDGEBOT_DEBUG) console.log(`Received message:${msg.content}`);
   if (msg.content === "ping") {
     msg.reply(`shapow!`);
   }
   if (msg.content.startsWith("~r")) {
-    if (msg.content.toLowerCase() === "~r list") listCommand(msg);
-    else reminderCommand(msg);
+    const cmd = msg.content.toLowerCase();
+    if (cmd === "~r list") listCommand(msg);
+    else if (env.NUDGEBOT_DEBUG) {
+      // Debug commands
+      if (cmd === "~r restart") {
+        msg.reply("restarting the bot now!").then(() => {
+          // db.close();
+          process.exit(0);
+        });
+      }
+      if (cmd === "~r uptime") {
+        const pup = process.uptime();
+        const phrs = Math.floor(pup / 3600);
+        const pmins = Math.floor((pup % 3600) / 60);
+        msg.reply(`Bot active for ${phrs} hours, ${pmins} minutes`);
+      }
+    } else reminderCommand(msg);
   }
   // Match variations on "Thank you, bot!"
   // Tests at https://regex101.com/r/MnSns5/1
   if (/thank(s| you).*(reminder|nudge)?bot([^\w]|$)/gim.test(msg.content)) {
-    msg.reply("You're very welcome!");
+    msg.reply("you're very welcome!");
   }
 });
 

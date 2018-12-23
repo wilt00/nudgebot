@@ -26,6 +26,17 @@ const insertStatement = db.prepare(
 const getPast = db.prepare("SELECT * FROM reminders WHERE r_time <= ?");
 const deletePast = db.prepare("DELETE FROM reminders WHERE r_time <= ?");
 const getCurrent = db.prepare("SELECT * FROM reminders WHERE r_time > ?");
+const deleteById = db.prepare("DELETE FROM reminders WHERE r_id = ?");
+
+const testSelectAll = db.prepare("SELECT * FROM reminders");
+
+export function closeDB() {
+  db.close();
+}
+
+export function listDBReminders() {
+  return testSelectAll.all();
+}
 
 export function restore() {
   const now = new Date().toISOString();
@@ -131,6 +142,10 @@ export class Reminder {
   public delete() {
     const i = Reminder.reminders.findIndex(r => r.equals(this), this);
     Reminder.reminders.splice(i, 1);
+    const result = deleteById.run(this.id);
+    if (result.changes !== 1) {
+      console.error("Error: Expected to delete 1 row, ${result.changes} changes");
+    }
   }
 
   public notify() {
