@@ -86,6 +86,10 @@ export class Reminder {
     return Reminder.reminders;
   }
 
+  public static getById(targetId: number): Reminder {
+    return Reminder.reminders.find(r => r.id === targetId);
+  }
+
   private static readonly reminders: Reminder[] = [];
 
   public readonly at: Date;
@@ -161,7 +165,7 @@ export class Reminder {
   }
 
   public toString(): string {
-    return `${this.pendingString()}${this.about ? ` - ${this.about}` : ""}`;
+    return `[${this.id}] ${this.pendingString()}${this.about ? ` - ${this.about}` : ""}`;
   }
 
   private pendingString(): string {

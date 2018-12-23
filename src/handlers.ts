@@ -116,6 +116,27 @@ export function listCommand(msg: Discord.Message) {
 }
 
 export function listAllCommand(msg: Discord.Message) {
-  console.log(Reminder.listAll().map(r => r.toString()));
+  console.log(Reminder.listAll().map(r => `${r.user.tag} (${r.user.id}): ${r.toString()}`));
   msg.reply("Reminders written to log!");
+}
+
+export function deleteCommand(msg: Discord.Message, cmd: string) {
+  const targetIdStr = cmd.split(" ")[2];
+  const targetId = parseInt(targetIdStr, 10);
+  if (isNaN(targetId)) {
+    msg.reply(`reminder id "${targetIdStr}" is invalid!`);
+    return;
+  }
+  const targetReminder = Reminder.getById(targetId);
+  if (!targetReminder) {
+    msg.reply(`Could not find reminder with id ${targetId}`);
+    return;
+  }
+  if (!targetReminder.user.equals(msg.author)) {
+    msg.reply(`that reminder doesn't belong to you!`);
+    return;
+  }
+  msg.reply(["Deleting reminder:", targetReminder.toString()]);
+  targetReminder.delete();
+  msg.reply("Deleted!");
 }

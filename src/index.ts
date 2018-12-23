@@ -2,7 +2,12 @@ import * as Discord from "discord.js";
 import * as Dotenv from "dotenv";
 import { env } from "process";
 import { disClient } from "./globals";
-import { listAllCommand, listCommand, reminderCommand } from "./handlers";
+import {
+  deleteCommand,
+  listAllCommand,
+  listCommand,
+  reminderCommand,
+} from "./handlers";
 import { closeDB, restore } from "./reminder";
 
 // Load .env config. Expects: DISCORD_TOKEN
@@ -43,12 +48,21 @@ disClient.on("message", (msg: Discord.Message) => {
   }
   if (msg.content.startsWith("~r")) {
     const cmd = msg.content.trim().toLowerCase();
-    switch (cmd) {
+    switch (
+      cmd
+        .split(" ")
+        .slice(0, 2)
+        .join(" ")
+    ) {
       case "~r list":
+        if (env.NUDGEBOT_DEBUG && cmd === "~r list all") {
+          listAllCommand(msg);
+          break;
+        }
         listCommand(msg);
         break;
-      case "~r list all":
-        if (env.NUDGEBOT_DEBUG) listAllCommand(msg);
+      case "~r delete":
+        deleteCommand(msg, cmd);
         break;
       case "~r restart":
         if (env.NUDGEBOT_DEBUG) {
