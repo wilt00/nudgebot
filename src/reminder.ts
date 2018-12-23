@@ -1,7 +1,7 @@
 import * as DB from "better-sqlite3";
 import * as Discord from "discord.js";
 import { IntLike } from "integer";
-import { disClient } from "./index";
+import { disClient } from "./globals";
 
 type SendableChannel =
   | Discord.TextChannel
@@ -80,6 +80,10 @@ export function restore() {
 export class Reminder {
   public static list(usr: Discord.User) {
     return Reminder.reminders.filter(r => r.user.equals(usr));
+  }
+
+  public static listAll() {
+    return Reminder.reminders;
   }
 
   private static readonly reminders: Reminder[] = [];

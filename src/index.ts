@@ -1,7 +1,8 @@
 import * as Discord from "discord.js";
 import * as Dotenv from "dotenv";
 import { env } from "process";
-import { listCommand, reminderCommand } from "./handlers";
+import { disClient } from "./globals";
+import { listAllCommand, listCommand, reminderCommand } from "./handlers";
 import { closeDB, restore } from "./reminder";
 
 // Load .env config. Expects: DISCORD_TOKEN
@@ -12,17 +13,15 @@ if (configResult.error) {
   process.exit(-1);
 }
 
-export const disClient = new Discord.Client();
-
 const onTime = new Date();
 
 const exitFn = () => {
   closeDB();
-}
-process.on('exit', exitFn);
-process.on('SIGINT', exitFn);
-process.on('SIGHUP', exitFn);
-process.on('SIGTERM', exitFn);
+};
+process.on("exit", exitFn);
+process.on("SIGINT", exitFn);
+process.on("SIGHUP", exitFn);
+process.on("SIGTERM", exitFn);
 
 disClient.on("ready", () => {
   console.log(`Logged in as ${disClient.user.tag}!`);
@@ -44,19 +43,22 @@ disClient.on("message", (msg: Discord.Message) => {
   }
   if (msg.content.startsWith("~r")) {
     const cmd = msg.content.trim().toLowerCase();
-    switch(cmd) {
-      case("~r list"):
+    switch (cmd) {
+      case "~r list":
         listCommand(msg);
         break;
-      case("~r restart"):
+      case "~r list all":
+        if (env.NUDGEBOT_DEBUG) listAllCommand(msg);
+        break;
+      case "~r restart":
         if (env.NUDGEBOT_DEBUG) {
           msg.reply("restarting the bot now!").then(() => {
-            // db.close();
+            closeDB();
             process.exit(0);
           });
         }
         break;
-      case("~r uptime"):
+      case "~r uptime":
         const pup = process.uptime();
         const phrs = Math.floor(pup / 3600);
         const pmins = Math.floor((pup % 3600) / 60);

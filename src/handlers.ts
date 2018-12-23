@@ -114,3 +114,8 @@ export function listCommand(msg: Discord.Message) {
     msg.reply(["here are your active reminders!"].concat(reminderStrings));
   }
 }
+
+export function listAllCommand(msg: Discord.Message) {
+  console.log(Reminder.listAll().map(r => r.toString()));
+  msg.reply("Reminders written to log!");
+}
