@@ -39,28 +39,33 @@ disClient.on("error", e => {
 });
 
 disClient.on("message", (msg: Discord.Message) => {
-  if (env.NUDGEBOT_DEBUG) console.log(`Received message:${msg.content}`);
-  if (msg.content === "ping") {
-    msg.reply(`shapow!`);
+  if (env.NUDGEBOT_DEBUG) {
+    console.log(`Received message:${msg.content}`);
   }
   if (msg.content.startsWith("~r")) {
-    const cmd = msg.content.toLowerCase();
-    if (cmd === "~r list") listCommand(msg);
-    else if (env.NUDGEBOT_DEBUG) {
-      // Debug commands
-      if (cmd === "~r restart") {
-        msg.reply("restarting the bot now!").then(() => {
-          // db.close();
-          process.exit(0);
-        });
-      }
-      if (cmd === "~r uptime") {
+    const cmd = msg.content.trim().toLowerCase();
+    switch(cmd) {
+      case("~r list"):
+        listCommand(msg);
+        break;
+      case("~r restart"):
+        if (env.NUDGEBOT_DEBUG) {
+          msg.reply("restarting the bot now!").then(() => {
+            // db.close();
+            process.exit(0);
+          });
+        }
+        break;
+      case("~r uptime"):
         const pup = process.uptime();
         const phrs = Math.floor(pup / 3600);
         const pmins = Math.floor((pup % 3600) / 60);
         msg.reply(`Bot active for ${phrs} hours, ${pmins} minutes`);
-      }
-    } else reminderCommand(msg);
+        break;
+      default:
+        reminderCommand(msg);
+        break;
+    }
   }
   // Match variations on "Thank you, bot!"
   // Tests at https://regex101.com/r/MnSns5/1
