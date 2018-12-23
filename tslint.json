@@ -10,12 +10,37 @@
       "severity": "warning"
     },
     "adjacent-overload-signatures": true,
-    "promise-function-async": true,
-    "await-promise": true,
     "ban-comma-operator": true,
     "encoding": true,
-    "completed-docs": true,
-    "curly": false
+    "curly": false,
+    "forin": true,
+    "interface-name": true,
+    "interface-over-type-literal": true,
+    "label-position": true,
+    "no-angle-bracket-type-assertion": true,
+
+    // Require types
+    // "completed-docs": true,
+    // "promise-function-async": true,
+    // "await-promise": true,
+    // "match-default-export-name": true,
+
+    // tslint-eslint-rules
+    "no-constant-condition": true,
+    "no-control-regex": true,
+    "no-duplicate-case": true,
+    "no-empty-character-class": true,
+    "no-ex-assign": true,
+    "no-extra-boolean-cast": true,
+    "no-extra-semi": true,
+    "no-inner-declarations": true,
+    "no-invalid-regexp": true,
+    "no-sparse-arrays": true,
+    "no-unexpected-multiline": true,
+    "valid-jsdoc": true,
+    "valid-typeof": true,
+    "ter-no-self-compare": true,
+    "handle-callback-err": true
   },
-  "rulesDirectory": []
+  "rulesDirectory": ["node_modules/tslint-eslint-rules/dist/rules"]
 }
