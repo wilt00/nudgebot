@@ -1,8 +1,6 @@
 import * as Discord from "discord.js";
 import Message = require("./message.js");
-import { Reminder, ReminderStore } from "./reminder";
-
-const reminders = new ReminderStore();
+import { Reminder } from "./reminder";
 
 function padMin(mins: number): string {
   if (mins < 10) {
@@ -29,14 +27,14 @@ export function reminderCommand(msg: Discord.Message) {
       "[prefix] in 25 minutes",
       "[prefix] in 2 hours and 30 minutes",
       "[prefix] 2 hrs 30 mins  (Sets one alarm in 2 hrs 30 mins)",
-      "[prefix] 2 hrs and in 30 mins  (Sets two alarms, one in 2 hrs and another in 30 mins)"
+      "[prefix] 2 hrs and in 30 mins  (Sets two alarms, one in 2 hrs and another in 30 mins)",
     ]);
     return;
   }
 
   // Combine relative tokens into one
   const relTokens: Message.IRelTime[][] = [[]];
-  let r = 0;
+  let j = 0;
   msgInfo.list.forEach((t, i, ls) => {
     // Just relative tokens - but don't .filter(), we need the info
     if (t.type !== "REL") return;
@@ -48,12 +46,12 @@ export function reminderCommand(msg: Discord.Message) {
     if (
       t.newRel ||
       (i > 0 && ls[i - 1].type !== "REL") ||
-      relTokens[r].some(rt => rt.unit === t.unit)
+      relTokens[j].some(rt => rt.unit === t.unit)
     ) {
-      r++;
-      relTokens[r] = [];
+      j++;
+      relTokens[j] = [];
     }
-    relTokens[r].push(t);
+    relTokens[j].push(t);
   });
 
   for (const relChunk of relTokens) {
@@ -62,15 +60,20 @@ export function reminderCommand(msg: Discord.Message) {
     const secs = relChunk.reduce((acc, cur) => acc + cur.seconds, 0);
     const targetDate = new Date(now.valueOf() + 1000 * secs);
 
-    const r = new Reminder(targetDate, msg, msgInfo.message);
-    reminders.add(r);
+    const r = new Reminder(
+      targetDate,
+      msg.author,
+      msg.channel,
+      msgInfo.message
+    );
     r.notify();
   }
 
   const absTokens = msgInfo.list.filter(t => t.type === "ABS");
   if (absTokens.length > 0) {
-    for (let t of absTokens as Message.IAbsTime[]) {
-      let dayStr: string, dayNum: number;
+    for (const t of absTokens as Message.IAbsTime[]) {
+      let dayStr: string;
+      let dayNum: number;
       if (t.minutes < 0) t.minutes = 0;
       if (
         now.getHours() > t.hours ||
@@ -91,19 +94,23 @@ export function reminderCommand(msg: Discord.Message) {
         t.hours,
         t.minutes
       );
-      const r = new Reminder(targetDate, msg, msgInfo.message);
-      reminders.add(r);
+      const r = new Reminder(
+        targetDate,
+        msg.author,
+        msg.channel,
+        msgInfo.message
+      );
       r.notify();
     }
   }
 }
 
 export function listCommand(msg: Discord.Message) {
-  const rList = reminders.get(msg.author);
+  const rList = Reminder.list(msg.author);
   if (!rList || rList.length === 0) {
     msg.reply("you have no currently active reminders!");
   } else {
-    const reminderStrings = rList.map((r) => r.list());
+    const reminderStrings = rList.map(r => r.toString());
     msg.reply(["here are your active reminders!"].concat(reminderStrings));
   }
 }

@@ -1,9 +1,11 @@
+import * as DB from "better-sqlite3";
 import * as Discord from "discord.js";
 import * as Dotenv from "dotenv";
 // import Message = require("./message.js");
 // import { inspect } from "util";
 import { env } from "process";
 import { listCommand, reminderCommand } from "./handlers";
+import { restore } from "./reminder";
 
 // Load .env config. Expects: DISCORD_TOKEN
 const configResult = Dotenv.config();
@@ -13,13 +15,26 @@ if (configResult.error) {
   process.exit(-1);
 }
 
-const client = new Discord.Client();
+export const disClient = new Discord.Client();
 
-client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+// const exitFn = () => {
+//   db.close();
+// }
+// process.on('exit', exitFn);
+// process.on('SIGINT', exitFn);
+// process.on('SIGHUP', exitFn);
+// process.on('SIGTERM', exitFn);
+
+disClient.on("ready", () => {
+  console.log(`Logged in as ${disClient.user.tag}!`);
 });
 
-client.on("message", (msg: Discord.Message) => {
+disClient.on("error", (e) => {
+  console.error("Error event fired");
+  console.error(e);
+});
+
+disClient.on("message", (msg: Discord.Message) => {
   if (msg.content === "ping") {
     msg.reply(`shapow!`);
   }
@@ -34,4 +49,4 @@ client.on("message", (msg: Discord.Message) => {
   }
 });
 
-client.login(env.DISCORD_TOKEN);
+disClient.login(env.DISCORD_TOKEN).then(restore);
