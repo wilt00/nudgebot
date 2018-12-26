@@ -152,7 +152,7 @@ export class Reminder {
     Reminder.reminders.splice(i, 1);
     const result = deleteById.run(this.id);
     if (result.changes !== 1) {
-      console.error("Error: Expected to delete 1 row, ${result.changes} changes");
+      console.error(`Error: Expected to delete 1 row, ${result.changes} changes`);
     }
   }
 

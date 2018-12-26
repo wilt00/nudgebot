@@ -34,7 +34,8 @@
     "start": "node ./dist/index.js",
     "clean": "rm dist/* && rm src/message.js",
     "build": "pegjs -o src/message.js src/message.pegjs && cp src/message.js dist/message.js && tsc",
-    "test": "mocha ./dist/message.test.js"
+    "test": "mocha ./dist/message.test.js",
+    "deploy": "pm2 stop index && npm install && npm run build && npm test && pm2 start dist/index.js"
   },
   "author": "",
   "license": "MIT"
