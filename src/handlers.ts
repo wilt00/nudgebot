@@ -1,4 +1,5 @@
 import * as Discord from "discord.js";
+import { Maxint, MaxSecs } from "./globals";
 import Message = require("./message.js");
 import { listDBReminders, Reminder } from "./reminder";
 
@@ -58,6 +59,14 @@ export function reminderCommand(msg: Discord.Message) {
     if (relChunk.length < 1) continue;
 
     const secs = relChunk.reduce((acc, cur) => acc + cur.seconds, 0);
+
+    // Test for overflow
+    // Currently cannot schedule timer more than Maxint ms in future
+    if (secs > MaxSecs) {
+      msg.reply("that reminder is too far in the future!");
+      continue;
+    }
+
     const targetDate = new Date(now.valueOf() + 1000 * secs);
 
     const r = new Reminder(
@@ -116,7 +125,9 @@ export function listCommand(msg: Discord.Message) {
 }
 
 export function listAllCommand(msg: Discord.Message) {
-  console.log(Reminder.listAll().map(r => `${r.user.tag} (${r.user.id}): ${r.toString()}`));
+  console.log(
+    Reminder.listAll().map(r => `${r.user.tag} (${r.user.id}): ${r.toString()}`)
+  );
   msg.reply("Reminders written to log!");
 }
 
