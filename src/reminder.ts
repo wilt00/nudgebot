@@ -98,6 +98,7 @@ export class Reminder {
   public readonly user: Discord.User;
 
   private readonly id: IntLike;
+  private wasDeleted = false;
 
   constructor(
     time: Date,
@@ -140,6 +141,7 @@ export class Reminder {
   }
 
   public fire() {
+    if (this.wasDeleted) return;
     const msgOut = [`This is your reminder, ${this.user}!`];
     if (this.about) msgOut.push(`I'm reminding you about: ${this.about}`);
     this.channel.send(msgOut);
@@ -148,6 +150,7 @@ export class Reminder {
   }
 
   public delete() {
+    this.wasDeleted = true;
     const i = Reminder.reminders.findIndex(r => r.equals(this), this);
     Reminder.reminders.splice(i, 1);
     const result = deleteById.run(this.id);
